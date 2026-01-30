@@ -1,25 +1,24 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 6.0"
+# This data source finds the latest Amazon Linux 2023 AMI
+data "aws_ami" "latest_amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
 
-    }
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-kernel-6.1-*"]
   }
 
-  required_version = ">= 1.2.0"
-}
-
-provider "aws" {
-  region  = "us-west-2"
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
 }
 
 resource "aws_instance" "app_server" {
-  ami           = "ami-830c94e3"
+  ami           = data.aws_ami.latest_amazon_linux.id # Use the dynamically found ID
   instance_type = "t2.micro"
 
   tags = {
     Name = "Terraform_Demo"
   }
 }
-
